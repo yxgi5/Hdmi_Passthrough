@@ -20,12 +20,12 @@ set script_folder [_tcl::get_script_folder]
 ################################################################
 # Check if script is running in correct Vivado version.
 ################################################################
-set scripts_vivado_version 2017.4
+set scripts_vivado_version 2020.1
 set current_vivado_version [version -short]
 
 if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
    puts ""
-   catch {common::send_msg_id "BD_TCL-109" "ERROR" "This script was generated using Vivado <$scripts_vivado_version> and is being run in <$current_vivado_version> of Vivado. Please run the script in Vivado <$scripts_vivado_version> then open the design in Vivado <$current_vivado_version>. Upgrade the design by running \"Tools => Report => Report IP Status...\", then run write_bd_tcl to create an updated script."}
+   catch {common::send_gid_msg -ssname BD::TCL -id 2041 -severity "ERROR" "This script was generated using Vivado <$scripts_vivado_version> and is being run in <$current_vivado_version> of Vivado. Please run the script in Vivado <$scripts_vivado_version> then open the design in Vivado <$current_vivado_version>. Upgrade the design by running \"Tools => Report => Report IP Status...\", then run write_bd_tcl to create an updated script."}
 
    return 1
 }
@@ -83,10 +83,10 @@ if { ${design_name} eq "" } {
    #    4): Current design opened AND is empty AND names diff; design_name exists in project.
 
    if { $cur_design ne $design_name } {
-      common::send_msg_id "BD_TCL-001" "INFO" "Changing value of <design_name> from <$design_name> to <$cur_design> since current design is empty."
+      common::send_gid_msg -ssname BD::TCL -id 2001 -severity "INFO" "Changing value of <design_name> from <$design_name> to <$cur_design> since current design is empty."
       set design_name [get_property NAME $cur_design]
    }
-   common::send_msg_id "BD_TCL-002" "INFO" "Constructing design in IPI design <$cur_design>..."
+   common::send_gid_msg -ssname BD::TCL -id 2002 -severity "INFO" "Constructing design in IPI design <$cur_design>..."
 
 } elseif { ${cur_design} ne "" && $list_cells ne "" && $cur_design eq $design_name } {
    # USE CASES:
@@ -107,19 +107,19 @@ if { ${design_name} eq "" } {
    #    8) No opened design, design_name not in project.
    #    9) Current opened design, has components, but diff names, design_name not in project.
 
-   common::send_msg_id "BD_TCL-003" "INFO" "Currently there is no design <$design_name> in project, so creating one..."
+   common::send_gid_msg -ssname BD::TCL -id 2003 -severity "INFO" "Currently there is no design <$design_name> in project, so creating one..."
 
    create_bd_design $design_name
 
-   common::send_msg_id "BD_TCL-004" "INFO" "Making design <$design_name> as current_bd_design."
+   common::send_gid_msg -ssname BD::TCL -id 2004 -severity "INFO" "Making design <$design_name> as current_bd_design."
    current_bd_design $design_name
 
 }
 
-common::send_msg_id "BD_TCL-005" "INFO" "Currently the variable <design_name> is equal to \"$design_name\"."
+common::send_gid_msg -ssname BD::TCL -id 2005 -severity "INFO" "Currently the variable <design_name> is equal to \"$design_name\"."
 
 if { $nRet != 0 } {
-   catch {common::send_msg_id "BD_TCL-114" "ERROR" $errMsg}
+   catch {common::send_gid_msg -ssname BD::TCL -id 2006 -severity "ERROR" $errMsg}
    return $nRet
 }
 
@@ -132,27 +132,27 @@ if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
 xilinx.com:ip:axis_register_slice:1.1\
 xilinx.com:ip:util_vector_logic:2.0\
-xilinx.com:ip:v_hdmi_rx_ss:3.0\
-xilinx.com:ip:v_hdmi_tx_ss:3.0\
+xilinx.com:ip:v_hdmi_rx_ss:3.1\
+xilinx.com:ip:v_hdmi_tx_ss:3.1\
 xilinx.com:ip:xlconstant:1.1\
-xilinx.com:ip:vid_phy_controller:2.1\
-xilinx.com:ip:clk_wiz:5.4\
+xilinx.com:ip:vid_phy_controller:2.2\
+xilinx.com:ip:clk_wiz:6.0\
 xilinx.com:ip:axi_intc:4.1\
 xilinx.com:ip:axi_uartlite:2.0\
 xilinx.com:ip:lmb_bram_if_cntlr:4.0\
 xilinx.com:ip:lmb_v10:3.0\
 xilinx.com:ip:axi_iic:2.0\
 xilinx.com:ip:blk_mem_gen:8.4\
-xilinx.com:ip:microblaze:10.0\
+xilinx.com:ip:microblaze:11.0\
 xilinx.com:ip:mdm:3.2\
 xilinx.com:ip:proc_sys_reset:5.0\
 xilinx.com:ip:xlconcat:2.1\
 xilinx.com:ip:axi_gpio:2.0\
-xilinx.com:ip:v_tpg:7.0\
+xilinx.com:ip:v_tpg:8.0\
 "
 
    set list_ips_missing ""
-   common::send_msg_id "BD_TCL-006" "INFO" "Checking if the following IPs exist in the project's IP catalog: $list_check_ips ."
+   common::send_gid_msg -ssname BD::TCL -id 2011 -severity "INFO" "Checking if the following IPs exist in the project's IP catalog: $list_check_ips ."
 
    foreach ip_vlnv $list_check_ips {
       set ip_obj [get_ipdefs -all $ip_vlnv]
@@ -162,7 +162,7 @@ xilinx.com:ip:v_tpg:7.0\
    }
 
    if { $list_ips_missing ne "" } {
-      catch {common::send_msg_id "BD_TCL-115" "ERROR" "The following IPs are not found in the IP Catalog:\n  $list_ips_missing\n\nResolution: Please add the repository containing the IP(s) to the project." }
+      catch {common::send_gid_msg -ssname BD::TCL -id 2012 -severity "ERROR" "The following IPs are not found in the IP Catalog:\n  $list_ips_missing\n\nResolution: Please add the repository containing the IP(s) to the project." }
       set bCheckIPsPassed 0
    }
 
@@ -179,7 +179,7 @@ hdmi_acr_ctrl\
 "
 
    set list_mods_missing ""
-   common::send_msg_id "BD_TCL-006" "INFO" "Checking if the following modules exist in the project's sources: $list_check_mods ."
+   common::send_gid_msg -ssname BD::TCL -id 2020 -severity "INFO" "Checking if the following modules exist in the project's sources: $list_check_mods ."
 
    foreach mod_vlnv $list_check_mods {
       if { [can_resolve_reference $mod_vlnv] == 0 } {
@@ -188,14 +188,14 @@ hdmi_acr_ctrl\
    }
 
    if { $list_mods_missing ne "" } {
-      catch {common::send_msg_id "BD_TCL-115" "ERROR" "The following module(s) are not found in the project: $list_mods_missing" }
-      common::send_msg_id "BD_TCL-008" "INFO" "Please add source files for the missing module(s) above."
+      catch {common::send_gid_msg -ssname BD::TCL -id 2021 -severity "ERROR" "The following module(s) are not found in the project: $list_mods_missing" }
+      common::send_gid_msg -ssname BD::TCL -id 2022 -severity "INFO" "Please add source files for the missing module(s) above."
       set bCheckIPsPassed 0
    }
 }
 
 if { $bCheckIPsPassed != 1 } {
-  common::send_msg_id "BD_TCL-1003" "WARNING" "Will not continue with creation of design due to the error(s) above."
+  common::send_gid_msg -ssname BD::TCL -id 2023 -severity "WARNING" "Will not continue with creation of design due to the error(s) above."
   return 3
 }
 
@@ -210,21 +210,21 @@ proc create_hier_cell_v_tpg_ss_0 { parentCell nameHier } {
   variable script_folder
 
   if { $parentCell eq "" || $nameHier eq "" } {
-     catch {common::send_msg_id "BD_TCL-102" "ERROR" "create_hier_cell_v_tpg_ss_0() - Empty argument(s)!"}
+     catch {common::send_gid_msg -ssname BD::TCL -id 2092 -severity "ERROR" "create_hier_cell_v_tpg_ss_0() - Empty argument(s)!"}
      return
   }
 
   # Get object for parentCell
   set parentObj [get_bd_cells $parentCell]
   if { $parentObj == "" } {
-     catch {common::send_msg_id "BD_TCL-100" "ERROR" "Unable to find parent cell <$parentCell>!"}
+     catch {common::send_gid_msg -ssname BD::TCL -id 2090 -severity "ERROR" "Unable to find parent cell <$parentCell>!"}
      return
   }
 
   # Make sure parentObj is hier blk
   set parentType [get_property TYPE $parentObj]
   if { $parentType ne "hier" } {
-     catch {common::send_msg_id "BD_TCL-101" "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
+     catch {common::send_gid_msg -ssname BD::TCL -id 2091 -severity "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
      return
   }
 
@@ -240,9 +240,13 @@ proc create_hier_cell_v_tpg_ss_0 { parentCell nameHier } {
 
   # Create interface pins
   create_bd_intf_pin -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 S_AXI_GPIO
+
   create_bd_intf_pin -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 S_AXI_TPG
+
   create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:axis_rtl:1.0 m_axis_video
+
   create_bd_intf_pin -mode Slave -vlnv xilinx.com:interface:axis_rtl:1.0 s_axis_video
+
 
   # Create pins
   create_bd_pin -dir I -type clk ap_clk
@@ -256,7 +260,7 @@ proc create_hier_cell_v_tpg_ss_0 { parentCell nameHier } {
  ] $axi_gpio
 
   # Create instance: v_tpg, and set properties
-  set v_tpg [ create_bd_cell -type ip -vlnv xilinx.com:ip:v_tpg:7.0 v_tpg ]
+  set v_tpg [ create_bd_cell -type ip -vlnv xilinx.com:ip:v_tpg:8.0 v_tpg ]
   set_property -dict [ list \
    CONFIG.COLOR_SWEEP {0} \
    CONFIG.DISPLAY_PORT {0} \
@@ -290,21 +294,21 @@ proc create_hier_cell_mb_ss_0 { parentCell nameHier } {
   variable script_folder
 
   if { $parentCell eq "" || $nameHier eq "" } {
-     catch {common::send_msg_id "BD_TCL-102" "ERROR" "create_hier_cell_mb_ss_0() - Empty argument(s)!"}
+     catch {common::send_gid_msg -ssname BD::TCL -id 2092 -severity "ERROR" "create_hier_cell_mb_ss_0() - Empty argument(s)!"}
      return
   }
 
   # Get object for parentCell
   set parentObj [get_bd_cells $parentCell]
   if { $parentObj == "" } {
-     catch {common::send_msg_id "BD_TCL-100" "ERROR" "Unable to find parent cell <$parentCell>!"}
+     catch {common::send_gid_msg -ssname BD::TCL -id 2090 -severity "ERROR" "Unable to find parent cell <$parentCell>!"}
      return
   }
 
   # Make sure parentObj is hier blk
   set parentType [get_property TYPE $parentObj]
   if { $parentType ne "hier" } {
-     catch {common::send_msg_id "BD_TCL-101" "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
+     catch {common::send_gid_msg -ssname BD::TCL -id 2091 -severity "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
      return
   }
 
@@ -320,15 +324,25 @@ proc create_hier_cell_mb_ss_0 { parentCell nameHier } {
 
   # Create interface pins
   create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:iic_rtl:1.0 IIC
+
   create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:iic_rtl:1.0 IIC_0
+
   create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 M00_AXI
+
   create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 M01_AXI
+
   create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 M02_AXI
+
   create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 M05_AXI
+
   create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 M06_AXI
+
   create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 M08_AXI
+
   create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:uart_rtl:1.0 UART
+
   create_bd_intf_pin -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 sys_diff_clock
+
 
   # Create pins
   create_bd_pin -dir O -type clk clk_out2
@@ -358,14 +372,15 @@ proc create_hier_cell_mb_ss_0 { parentCell nameHier } {
  ] $axi_uartlite
 
   # Create instance: clk_wiz, and set properties
-  set clk_wiz [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:5.4 clk_wiz ]
+  set clk_wiz [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz ]
   set_property -dict [ list \
    CONFIG.CLKIN1_JITTER_PS {50.0} \
    CONFIG.CLKOUT1_JITTER {106.024} \
    CONFIG.CLKOUT1_PHASE_ERROR {82.655} \
+   CONFIG.CLKOUT2_DRIVES {BUFG} \
    CONFIG.CLKOUT2_JITTER {85.855} \
    CONFIG.CLKOUT2_PHASE_ERROR {82.655} \
-   CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {300.000} \
+   CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {300} \
    CONFIG.CLKOUT2_USED {true} \
    CONFIG.MMCM_CLKFBOUT_MULT_F {6.000} \
    CONFIG.MMCM_CLKIN1_PERIOD {5.000} \
@@ -375,6 +390,7 @@ proc create_hier_cell_mb_ss_0 { parentCell nameHier } {
    CONFIG.NUM_OUT_CLKS {2} \
    CONFIG.PRIM_IN_FREQ {200} \
    CONFIG.PRIM_SOURCE {Differential_clock_capable_pin} \
+   CONFIG.USE_PHASE_ALIGNMENT {true} \
  ] $clk_wiz
 
   # Create instance: dlmb_bram_if_cntlr, and set properties
@@ -428,7 +444,7 @@ proc create_hier_cell_mb_ss_0 { parentCell nameHier } {
  ] $lmb_bram
 
   # Create instance: mblaze, and set properties
-  set mblaze [ create_bd_cell -type ip -vlnv xilinx.com:ip:microblaze:10.0 mblaze ]
+  set mblaze [ create_bd_cell -type ip -vlnv xilinx.com:ip:microblaze:11.0 mblaze ]
   set_property -dict [ list \
    CONFIG.C_DEBUG_ENABLED {1} \
    CONFIG.C_D_AXI {1} \
@@ -513,21 +529,21 @@ proc create_hier_cell_audio_ss_0 { parentCell nameHier } {
   variable script_folder
 
   if { $parentCell eq "" || $nameHier eq "" } {
-     catch {common::send_msg_id "BD_TCL-102" "ERROR" "create_hier_cell_audio_ss_0() - Empty argument(s)!"}
+     catch {common::send_gid_msg -ssname BD::TCL -id 2092 -severity "ERROR" "create_hier_cell_audio_ss_0() - Empty argument(s)!"}
      return
   }
 
   # Get object for parentCell
   set parentObj [get_bd_cells $parentCell]
   if { $parentObj == "" } {
-     catch {common::send_msg_id "BD_TCL-100" "ERROR" "Unable to find parent cell <$parentCell>!"}
+     catch {common::send_gid_msg -ssname BD::TCL -id 2090 -severity "ERROR" "Unable to find parent cell <$parentCell>!"}
      return
   }
 
   # Make sure parentObj is hier blk
   set parentType [get_property TYPE $parentObj]
   if { $parentType ne "hier" } {
-     catch {common::send_msg_id "BD_TCL-101" "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
+     catch {common::send_gid_msg -ssname BD::TCL -id 2091 -severity "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
      return
   }
 
@@ -543,8 +559,11 @@ proc create_hier_cell_audio_ss_0 { parentCell nameHier } {
 
   # Create interface pins
   create_bd_intf_pin -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 S00_AXI
+
   create_bd_intf_pin -mode Slave -vlnv xilinx.com:interface:axis_rtl:1.0 axis_audio_in
+
   create_bd_intf_pin -mode Master -vlnv xilinx.com:interface:axis_rtl:1.0 axis_audio_out
+
 
   # Create pins
   create_bd_pin -dir I -type clk ACLK
@@ -563,20 +582,13 @@ proc create_hier_cell_audio_ss_0 { parentCell nameHier } {
   set block_name aud_pat_gen
   set block_cell_name aud_pat_gen
   if { [catch {set aud_pat_gen [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
-     catch {common::send_msg_id "BD_TCL-105" "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
      return 1
    } elseif { $aud_pat_gen eq "" } {
-     catch {common::send_msg_id "BD_TCL-106" "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
      return 1
    }
   
-  set_property -dict [ list \
-   CONFIG.SUPPORTS_NARROW_BURST {0} \
-   CONFIG.NUM_READ_OUTSTANDING {1} \
-   CONFIG.NUM_WRITE_OUTSTANDING {1} \
-   CONFIG.MAX_BURST_LENGTH {1} \
- ] [get_bd_intf_pins /audio_ss_0/aud_pat_gen/axi]
-
   # Create instance: axi_interconnect, and set properties
   set axi_interconnect [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect ]
   set_property -dict [ list \
@@ -584,7 +596,7 @@ proc create_hier_cell_audio_ss_0 { parentCell nameHier } {
  ] $axi_interconnect
 
   # Create instance: clk_wiz, and set properties
-  set clk_wiz [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:5.4 clk_wiz ]
+  set clk_wiz [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz ]
   set_property -dict [ list \
    CONFIG.CLKOUT1_DRIVES {BUFG} \
    CONFIG.CLKOUT1_JITTER {130.958} \
@@ -601,26 +613,20 @@ proc create_hier_cell_audio_ss_0 { parentCell nameHier } {
    CONFIG.PHASESHIFT_MODE {WAVEFORM} \
    CONFIG.PRIM_SOURCE {No_buffer} \
    CONFIG.USE_DYN_RECONFIG {true} \
+   CONFIG.USE_PHASE_ALIGNMENT {true} \
  ] $clk_wiz
 
   # Create instance: hdmi_acr_ctrl, and set properties
   set block_name hdmi_acr_ctrl
   set block_cell_name hdmi_acr_ctrl
   if { [catch {set hdmi_acr_ctrl [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
-     catch {common::send_msg_id "BD_TCL-105" "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
      return 1
    } elseif { $hdmi_acr_ctrl eq "" } {
-     catch {common::send_msg_id "BD_TCL-106" "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
      return 1
    }
   
-  set_property -dict [ list \
-   CONFIG.SUPPORTS_NARROW_BURST {0} \
-   CONFIG.NUM_READ_OUTSTANDING {1} \
-   CONFIG.NUM_WRITE_OUTSTANDING {1} \
-   CONFIG.MAX_BURST_LENGTH {1} \
- ] [get_bd_intf_pins /audio_ss_0/hdmi_acr_ctrl/axi]
-
   # Create interface connections
   connect_bd_intf_net -intf_net intf_net_aud_pat_gen_axis_audio_out [get_bd_intf_pins axis_audio_out] [get_bd_intf_pins aud_pat_gen/axis_audio_out]
   connect_bd_intf_net -intf_net intf_net_axi_interconnect_M00_AXI [get_bd_intf_pins aud_pat_gen/axi] [get_bd_intf_pins axi_interconnect/M00_AXI]
@@ -662,14 +668,14 @@ proc create_root_design { parentCell } {
   # Get object for parentCell
   set parentObj [get_bd_cells $parentCell]
   if { $parentObj == "" } {
-     catch {common::send_msg_id "BD_TCL-100" "ERROR" "Unable to find parent cell <$parentCell>!"}
+     catch {common::send_gid_msg -ssname BD::TCL -id 2090 -severity "ERROR" "Unable to find parent cell <$parentCell>!"}
      return
   }
 
   # Make sure parentObj is hier blk
   set parentType [get_property TYPE $parentObj]
   if { $parentType ne "hier" } {
-     catch {common::send_msg_id "BD_TCL-101" "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
+     catch {common::send_gid_msg -ssname BD::TCL -id 2091 -severity "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
      return
   }
 
@@ -682,14 +688,20 @@ proc create_root_design { parentCell } {
 
   # Create interface ports
   set RX_DDC_OUT [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:iic_rtl:1.0 RX_DDC_OUT ]
+
   set TX_DDC_OUT [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:iic_rtl:1.0 TX_DDC_OUT ]
+
   set iic_dp159 [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:iic_rtl:1.0 iic_dp159 ]
+
   set iic_hdmi_clock [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:iic_rtl:1.0 iic_hdmi_clock ]
+
   set rs232_uart [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:uart_rtl:1.0 rs232_uart ]
+
   set sys_diff_clock [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 sys_diff_clock ]
   set_property -dict [ list \
    CONFIG.FREQ_HZ {200000000} \
    ] $sys_diff_clock
+
 
   # Create ports
   set HDMI_RX_CLK_N_IN [ create_bd_port -dir I HDMI_RX_CLK_N_IN ]
@@ -736,17 +748,17 @@ proc create_root_design { parentCell } {
  ] $util_vector_logic_0
 
   # Create instance: v_hdmi_rx_ss, and set properties
-  set v_hdmi_rx_ss [ create_bd_cell -type ip -vlnv xilinx.com:ip:v_hdmi_rx_ss:3.0 v_hdmi_rx_ss ]
+  set v_hdmi_rx_ss [ create_bd_cell -type ip -vlnv xilinx.com:ip:v_hdmi_rx_ss:3.1 v_hdmi_rx_ss ]
   set_property -dict [ list \
    CONFIG.C_ADDR_WIDTH {10} \
    CONFIG.C_CD_INVERT {true} \
    CONFIG.C_EDID_RAM_SIZE {256} \
    CONFIG.C_EXDES_NIDRU {true} \
-   CONFIG.C_EXDES_RX_PLL_SELECTION {3} \
+   CONFIG.C_EXDES_RX_PLL_SELECTION {0} \
    CONFIG.C_EXDES_TOPOLOGY {0} \
-   CONFIG.C_EXDES_TX_PLL_SELECTION {0} \
+   CONFIG.C_EXDES_TX_PLL_SELECTION {6} \
    CONFIG.C_HDMI_FAST_SWITCH {true} \
-   CONFIG.C_HDMI_VERSION {2} \
+   CONFIG.C_HDMI_VERSION {3} \
    CONFIG.C_HPD_INVERT {false} \
    CONFIG.C_INCLUDE_HDCP_1_4 {false} \
    CONFIG.C_INCLUDE_HDCP_2_2 {false} \
@@ -759,13 +771,13 @@ proc create_root_design { parentCell } {
  ] $v_hdmi_rx_ss
 
   # Create instance: v_hdmi_tx_ss, and set properties
-  set v_hdmi_tx_ss [ create_bd_cell -type ip -vlnv xilinx.com:ip:v_hdmi_tx_ss:3.0 v_hdmi_tx_ss ]
+  set v_hdmi_tx_ss [ create_bd_cell -type ip -vlnv xilinx.com:ip:v_hdmi_tx_ss:3.1 v_hdmi_tx_ss ]
   set_property -dict [ list \
    CONFIG.C_ADDR_WIDTH {10} \
    CONFIG.C_EXDES_RX_PLL_SELECTION {3} \
    CONFIG.C_EXDES_TX_PLL_SELECTION {0} \
    CONFIG.C_HDMI_FAST_SWITCH {true} \
-   CONFIG.C_HDMI_VERSION {2} \
+   CONFIG.C_HDMI_VERSION {3} \
    CONFIG.C_HPD_INVERT {false} \
    CONFIG.C_HYSTERESIS_LEVEL {12} \
    CONFIG.C_INCLUDE_HDCP_1_4 {false} \
@@ -788,12 +800,19 @@ proc create_root_design { parentCell } {
  ] $vcc_const
 
   # Create instance: vid_phy_controller, and set properties
-  set vid_phy_controller [ create_bd_cell -type ip -vlnv xilinx.com:ip:vid_phy_controller:2.1 vid_phy_controller ]
+  set vid_phy_controller [ create_bd_cell -type ip -vlnv xilinx.com:ip:vid_phy_controller:2.2 vid_phy_controller ]
   set_property -dict [ list \
    CONFIG.CHANNEL_ENABLE {X0Y12 X0Y13 X0Y14} \
    CONFIG.CHANNEL_SITE {X0Y12} \
+   CONFIG.C_FOR_UPGRADE_ARCHITECTURE {placeholder} \
+   CONFIG.C_FOR_UPGRADE_DEVICE {placeholder} \
+   CONFIG.C_FOR_UPGRADE_MAXOPTVOL {0.00} \
+   CONFIG.C_FOR_UPGRADE_PACKAGE {placeholder} \
+   CONFIG.C_FOR_UPGRADE_PART {placeholder} \
+   CONFIG.C_FOR_UPGRADE_REFVOL {0.00} \
+   CONFIG.C_FOR_UPGRADE_SPEEDGRADE {0} \
    CONFIG.C_INPUT_PIXELS_PER_CLOCK {2} \
-   CONFIG.C_INT_HDMI_VER_CMPTBLE {2} \
+   CONFIG.C_INT_HDMI_VER_CMPTBLE {3} \
    CONFIG.C_NIDRU {false} \
    CONFIG.C_NIDRU_REFCLK_SEL {0} \
    CONFIG.C_RX_PLL_SELECTION {6} \
@@ -810,16 +829,18 @@ proc create_root_design { parentCell } {
    CONFIG.C_Tx_Tmds_Clk_Buffer {none} \
    CONFIG.C_Txrefclk_Rdy_Invert {true} \
    CONFIG.C_Use_Oddr_for_Tmds_Clkout {true} \
-   CONFIG.C_vid_phy_rx_axi4s_ch_TDATA_WIDTH {40} \
+   CONFIG.C_vid_phy_rx_axi4s_ch_INT_TDATA_WIDTH {20} \
+   CONFIG.C_vid_phy_rx_axi4s_ch_TDATA_WIDTH {20} \
    CONFIG.C_vid_phy_rx_axi4s_ch_TUSER_WIDTH {1} \
-   CONFIG.C_vid_phy_tx_axi4s_ch_TDATA_WIDTH {40} \
+   CONFIG.C_vid_phy_tx_axi4s_ch_INT_TDATA_WIDTH {20} \
+   CONFIG.C_vid_phy_tx_axi4s_ch_TDATA_WIDTH {20} \
    CONFIG.C_vid_phy_tx_axi4s_ch_TUSER_WIDTH {1} \
    CONFIG.DRPCLK_FREQ {100.0} \
    CONFIG.Rx_GT_Line_Rate {5.94} \
    CONFIG.Rx_GT_Ref_Clock_Freq {297} \
    CONFIG.Rx_Max_GT_Line_Rate {5.94} \
    CONFIG.Transceiver {GTHE4} \
-   CONFIG.Transceiver_Width {4} \
+   CONFIG.Transceiver_Width {2} \
    CONFIG.Tx_Buffer_Bypass {true} \
    CONFIG.Tx_GT_Line_Rate {5.94} \
    CONFIG.Tx_GT_Ref_Clock_Freq {297} \
@@ -898,20 +919,20 @@ proc create_root_design { parentCell } {
   connect_bd_net -net util_vector_logic_0_Res [get_bd_pins mb_ss_0/ext_reset_in] [get_bd_pins util_vector_logic_0/Res]
 
   # Create address segments
-  create_bd_addr_seg -range 0x00010000 -offset 0x80000000 [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs audio_ss_0/aud_pat_gen/axi/reg0] SEG_aud_pat_gen_reg0
-  create_bd_addr_seg -range 0x00010000 -offset 0x40000000 [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs v_tpg_ss_0/axi_gpio/S_AXI/Reg] SEG_axi_gpio_Reg
-  create_bd_addr_seg -range 0x00010000 -offset 0x41200000 [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs mb_ss_0/axi_intc/S_AXI/Reg] SEG_axi_intc_Reg
-  create_bd_addr_seg -range 0x00010000 -offset 0x40600000 [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs mb_ss_0/axi_uartlite/S_AXI/Reg] SEG_axi_uartlite_Reg
-  create_bd_addr_seg -range 0x00010000 -offset 0x44A10000 [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs audio_ss_0/clk_wiz/s_axi_lite/Reg] SEG_clk_wiz_Reg
-  create_bd_addr_seg -range 0x00040000 -offset 0x00000000 [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs mb_ss_0/dlmb_bram_if_cntlr/SLMB/Mem] SEG_dlmb_bram_if_cntlr_Mem
-  create_bd_addr_seg -range 0x00010000 -offset 0x40810000 [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs mb_ss_0/fmch_axi_iic1/S_AXI/Reg] SEG_fmch_axi_iic1_Reg
-  create_bd_addr_seg -range 0x00010000 -offset 0x40800000 [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs mb_ss_0/fmch_axi_iic/S_AXI/Reg] SEG_fmch_axi_iic_Reg
-  create_bd_addr_seg -range 0x00010000 -offset 0xC0000000 [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs audio_ss_0/hdmi_acr_ctrl/axi/reg0] SEG_hdmi_acr_ctrl_reg0
-  create_bd_addr_seg -range 0x00040000 -offset 0x00000000 [get_bd_addr_spaces mb_ss_0/mblaze/Instruction] [get_bd_addr_segs mb_ss_0/ilmb_bram_if_cntlr/SLMB/Mem] SEG_ilmb_bram_if_cntlr_Mem
-  create_bd_addr_seg -range 0x00010000 -offset 0x44A00000 [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs v_hdmi_rx_ss/S_AXI_CPU_IN/Reg] SEG_v_hdmi_rx_ss_Reg
-  create_bd_addr_seg -range 0x00020000 -offset 0x44A20000 [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs v_hdmi_tx_ss/S_AXI_CPU_IN/Reg] SEG_v_hdmi_tx_ss_Reg
-  create_bd_addr_seg -range 0x00010000 -offset 0x44A40000 [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs v_tpg_ss_0/v_tpg/s_axi_CTRL/Reg] SEG_v_tpg_Reg
-  create_bd_addr_seg -range 0x00010000 -offset 0x44A50000 [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs vid_phy_controller/vid_phy_axi4lite/Reg] SEG_vid_phy_controller_Reg
+  assign_bd_address -offset 0x80000000 -range 0x00010000 -target_address_space [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs audio_ss_0/aud_pat_gen/axi/reg0] -force
+  assign_bd_address -offset 0x40000000 -range 0x00010000 -target_address_space [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs v_tpg_ss_0/axi_gpio/S_AXI/Reg] -force
+  assign_bd_address -offset 0x41200000 -range 0x00010000 -target_address_space [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs mb_ss_0/axi_intc/S_AXI/Reg] -force
+  assign_bd_address -offset 0x40600000 -range 0x00010000 -target_address_space [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs mb_ss_0/axi_uartlite/S_AXI/Reg] -force
+  assign_bd_address -offset 0x44A10000 -range 0x00010000 -target_address_space [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs audio_ss_0/clk_wiz/s_axi_lite/Reg] -force
+  assign_bd_address -offset 0x00000000 -range 0x00040000 -target_address_space [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs mb_ss_0/dlmb_bram_if_cntlr/SLMB/Mem] -force
+  assign_bd_address -offset 0x40810000 -range 0x00010000 -target_address_space [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs mb_ss_0/fmch_axi_iic1/S_AXI/Reg] -force
+  assign_bd_address -offset 0x40800000 -range 0x00010000 -target_address_space [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs mb_ss_0/fmch_axi_iic/S_AXI/Reg] -force
+  assign_bd_address -offset 0xC0000000 -range 0x00010000 -target_address_space [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs audio_ss_0/hdmi_acr_ctrl/axi/reg0] -force
+  assign_bd_address -offset 0x00000000 -range 0x00040000 -target_address_space [get_bd_addr_spaces mb_ss_0/mblaze/Instruction] [get_bd_addr_segs mb_ss_0/ilmb_bram_if_cntlr/SLMB/Mem] -force
+  assign_bd_address -offset 0x44A00000 -range 0x00010000 -target_address_space [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs v_hdmi_rx_ss/S_AXI_CPU_IN/Reg] -force
+  assign_bd_address -offset 0x44A20000 -range 0x00020000 -target_address_space [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs v_hdmi_tx_ss/S_AXI_CPU_IN/Reg] -force
+  assign_bd_address -offset 0x44A40000 -range 0x00010000 -target_address_space [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs v_tpg_ss_0/v_tpg/s_axi_CTRL/Reg] -force
+  assign_bd_address -offset 0x44A50000 -range 0x00010000 -target_address_space [get_bd_addr_spaces mb_ss_0/mblaze/Data] [get_bd_addr_segs vid_phy_controller/vid_phy_axi4lite/Reg] -force
 
 
   # Restore current instance

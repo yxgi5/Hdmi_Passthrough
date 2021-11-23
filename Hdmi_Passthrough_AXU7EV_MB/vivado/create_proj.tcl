@@ -1,5 +1,5 @@
 #*****************************************************************************************
-# Vivado (TM) v2017.4 (64-bit)
+# Vivado (TM) v2020.1 (64-bit)
 #
 # create_proj.tcl: Tcl script for re-creating project 'Native_to_AXI4S'
 #
@@ -12,7 +12,7 @@
 ################################################################
 # Check if script is running in correct Vivado version.
 ################################################################
-set scripts_vivado_version 2017.4
+set scripts_vivado_version 2020.1
 set current_vivado_version [version -short]
 
 if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
@@ -39,9 +39,9 @@ if {[string equal [get_filesets -quiet sources_1] ""]} {
   create_fileset -srcset sources_1
 }
 # Add hdl files
-add_files -fileset sources_1 -norecurse -scan_for_includes ./hdl
+#add_files -fileset sources_1 -norecurse -scan_for_includes ./hdl
 #add_files -fileset sources_1 -norecurse -scan_for_includes ./hdl/hdmi
-#import_files -fileset sources_1 -norecurse ./hdl
+import_files -fileset sources_1 -norecurse ./hdl
 #add_files -fileset sources_1 -norecurse ./hdl/ip/clk_200M/clk_200M.xci
 #add_files -fileset sources_1 -norecurse ./hdl/ip/clk_94m/clk_94m.xci
 #add_files -fileset sources_1 -norecurse ./hdl/ip/clk_pixel/clk_pixel.xci
@@ -62,11 +62,11 @@ if {[string equal [get_filesets -quiet constrs_1] ""]} {
 }
 # Add constraint files
 add_files -fileset constrs_1 -norecurse -scan_for_includes ./xdc
-#import_files -fileset constrs_1 -norecurse ./xdc
+import_files -fileset constrs_1 -norecurse ./xdc
 
-#add_files -fileset utils_1 -norecurse ./tcl/phys_opt_design.tcl
-#add_files -fileset utils_1 -norecurse ./tcl/route_design.tcl
-#add_files -fileset utils_1 -norecurse ./tcl/postroute_phys_opt_design.tcl
+add_files -fileset utils_1 -norecurse ./tcl/phys_opt_design.tcl
+add_files -fileset utils_1 -norecurse ./tcl/route_design.tcl
+add_files -fileset utils_1 -norecurse ./tcl/postroute_phys_opt_design.tcl
 
 # Create 'sim_1' fileset (if not found)
 if {[string equal [get_filesets -quiet sim_1] ""]} {
